@@ -1,73 +1,195 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+Cron Job Management Service
+Overview
+The Cron Job Management Service is a NestJS-based application that allows users to manage cron jobs. The service supports creating, updating, deleting, and retrieving cron jobs, and it executes them based on specified schedules. Additionally, the service includes webhook handling and logs the history of cron job triggers and their responses.
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Technology Stack
+Backend: NestJS
+Database: MongoDB
+HTTP Client: Axios
+Scheduling: Node-cron
+Features
+CRUD operations for managing cron jobs.
+Scheduled execution of cron jobs.
+Webhook handling and storage.
+Rate limiting and API throttling.
+Error handling and logging.
+Scalability to handle a large number of cron jobs.
+Prerequisites
+Node.js
+MongoDB
+Installation
+Clone the repository:
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+git clone <repository_url>
+cd cron-job-service
+Install dependencies:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+npm install
+Set up environment variables. Create a .env file in the root directory with the following content:
 
-## Installation
+env
+PORT=3000
+MONGODB_URI=mongodb://localhost:27017/cron-job-service
+Start the MongoDB server if not already running:
 
-```bash
-$ npm install
-```
+mongod
+Run the application:
 
-## Running the app
+npm run start:dev
 
-```bash
-# development
-$ npm run start
 
-# watch mode
-$ npm run start:dev
+API Documentation
+1. Create Cron Job
+Endpoint: POST /cron-jobs
+Description: Creates a new cron job.
+Request Body:
+json
 
-# production mode
-$ npm run start:prod
-```
+{
+  "name": "My Cron Job",
+  "link": "http://example.com/api",
+  "apiKey": "your-api-key",
+  "schedule": "*/5 * * * *",
+  "startDate": "2024-06-01T00:00:00Z"
+}
+Response:
+201 Created
+Body:
+json
 
-## Test
+{
+  "_id": "609b8e839a4b7b3f4f1e9c34",
+  "name": "My Cron Job",
+  "link": "http://example.com/api",
+  "apiKey": "your-api-key",
+  "schedule": "*/5 * * * *",
+  "startDate": "2024-06-01T00:00:00Z",
+  "history": [],
+  "__v": 0
+}
+2. Get All Cron Jobs
+Endpoint: GET /cron-jobs
+Description: Retrieves all cron jobs.
+Response:
+200 OK
+Body:
+json
 
-```bash
-# unit tests
-$ npm run test
+[
+  {
+    "_id": "609b8e839a4b7b3f4f1e9c34",
+    "name": "My Cron Job",
+    "link": "http://example.com/api",
+    "apiKey": "your-api-key",
+    "schedule": "*/5 * * * *",
+    "startDate": "2024-06-01T00:00:00Z",
+    "history": [],
+    "__v": 0
+  }
+]
+3. Get Cron Job by ID
+Endpoint: GET /cron-jobs/:id
+Description: Retrieves a cron job by its ID.
+Response:
+200 OK
+404 Not Found if the cron job does not exist.
+400 Bad Request if the ID format is invalid.
+Body:
+json
 
-# e2e tests
-$ npm run test:e2e
+{
+  "_id": "609b8e839a4b7b3f4f1e9c34",
+  "name": "My Cron Job",
+  "link": "http://example.com/api",
+  "apiKey": "your-api-key",
+  "schedule": "*/5 * * * *",
+  "startDate": "2024-06-01T00:00:00Z",
+  "history": [],
+  "__v": 0
+}
+4. Update Cron Job
+Endpoint: PUT /cron-jobs/:id
+Description: Updates an existing cron job.
+Request Body:
+json
 
-# test coverage
-$ npm run test:cov
-```
+{
+  "name": "Updated Cron Job",
+  "link": "http://example.com/new-api",
+  "schedule": "0 0 * * *",
+  "startDate": "2024-06-01T00:00:00Z"
+}
+Response:
+200 OK
+404 Not Found if the cron job does not exist.
+400 Bad Request if the ID format is invalid.
+Body:
+json
 
-## Support
+{
+  "_id": "609b8e839a4b7b3f4f1e9c34",
+  "name": "Updated Cron Job",
+  "link": "http://example.com/new-api",
+  "apiKey": "your-api-key",
+  "schedule": "0 0 * * *",
+  "startDate": "2024-06-01T00:00:00Z",
+  "history": [],
+  "__v": 0
+}
+5. Delete Cron Job
+Endpoint: DELETE /cron-jobs/:id
+Description: Deletes a cron job by its ID.
+Response:
+204 No Content
+404 Not Found if the cron job does not exist.
+400 Bad Request if the ID format is invalid.
+6. Create Webhook
+Endpoint: POST /cron-jobs/webhook
+Description: Handles webhook data.
+Request Body:
+json
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+{
+  "data": "Webhook data..."
+}
+Response:
+201 Created
+Body:
+json
 
-## Stay in touch
+{
+  "_id": "609b8e839a4b7b3f4f1e9c34",
+  "data": "Webhook data...",
+  "createdAt": "2024-06-01T00:00:00Z",
+  "__v": 0
+}
+7. Get All Webhooks
+Endpoint: GET /cron-jobs/webhooks
+Description: Retrieves all webhooks.
+Response:
+200 OK
+Body:
+json
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+[
+  {
+    "_id": "609b8e839a4b7b3f4f1e9c34",
+    "data": "Webhook data...",
+    "createdAt": "2024-06-01T00:00:00Z",
+    "__v": 0
+  }
+]
+Unit Testing
+Ensure you write unit tests for your service methods to verify their functionality. Use the Jest framework provided by NestJS:
 
-## License
 
-Nest is [MIT licensed](LICENSE).
+npm run test
+Best Practices
+Validation: Ensure input validation using DTOs and class validators.
+Error Handling: Gracefully handle errors and return meaningful HTTP status codes and messages.
+Security: Implement rate limiting and API throttling to prevent abuse.
+Logging: Use the NestJS Logger for logging important events and errors.
+Documentation: Keep this documentation up-to-date with any changes to the API.
+Conclusion
+This documentation covers the setup, usage, and API endpoints of the Cron Job Management Service. By following the instructions and using the provided endpoints, you can effectively manage cron jobs and webhooks within your application.
